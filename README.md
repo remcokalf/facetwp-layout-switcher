@@ -30,11 +30,11 @@ The add-on comes with 7 built-in layout modes. These modes switch the number of 
 - list
 - compact list
 
-The above 7 mode names have built-in CSS when using a switcher with type="icons" (see below): 
-- for the icons themselves, with svg background images.
-- for post listings made with the Listing Builder, which have a CSS grid layout with a set number of columns. The built-in CSS _only_ switches the number of columns of the layout. All other desired layout changes, e.g. floating images to the left in "list" mode, or hiding images entirely in "compact list", you can add yourself.
+The above 7 mode names have built-in CSS: 
+- for the svg icons when using type=icons (see below).
+- for post listings made with the Listing Builder that have a CSS grid layout with a set number of columns. The built-in CSS _only_ switches the number of columns of the layout. All other desired layout changes, e.g. floating images to the left in "list" mode, or hiding images entirely in "compact list", you can add yourself.
 
-You don't have to use these 5 redefined modes: you can set your own modes and write the corresponding layout listing CSS for it yourself.
+You don't have to use these predefined modes: you can set your own modes and write the corresponding layout listing CSS for it yourself.
 
 ### Set a layout switcher type
 The layout switcher can have four output types:
@@ -83,7 +83,7 @@ To use the label as the first dropdown/fselect option instead, use labelposition
 ### Active layout mode
 When using type="text" or type="icons", the selected layout mode has the class "active". The first mode will have the "active" class on page load.
 
-For type="dropdown" and type="fselect", with the label position "inside", there is no option selected on page loa. So it's best to style the first option not to be the default mode, and use the state in which no option is selected as the default layout mode.
+For type="dropdown" and type="fselect", with the label position "inside", there is no option selected on page load. So it's best not to style the first switcher option as the default layout mode, and use the state in which no option is selected as the default layout mode.
 
 With the label position "outside", it is more logical to style the first mode as the "active" mode because it is visibly selected on page load.
 
