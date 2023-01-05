@@ -20,10 +20,8 @@ Make sure the shortcode is placed outside the template that will have its layout
 
 #### Use built-in modes and CSS
 
-The add-on comes with 7 built-in layout modes. These modes switch the number of columns of a FacetWP Listing Builder template:
+The add-on comes with 5 built-in layout modes. These modes switch the number of columns of a FacetWP Listing Builder template:
 
-- 6 columns
-- 5 columns
 - 4 columns
 - 3 columns
 - 2 columns
