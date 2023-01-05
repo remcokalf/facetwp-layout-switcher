@@ -109,6 +109,14 @@
 }
 
 /* built-in column styles */
+.layoutmode-6-columns .fwpl-layout {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.layoutmode-5-columns .fwpl-layout {
+    grid-template-columns: repeat(5, 1fr);
+}
+
 .layoutmode-4-columns .fwpl-layout {
     grid-template-columns: repeat(4, 1fr);
 }
