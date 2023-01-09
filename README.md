@@ -28,7 +28,7 @@ The add-on comes with 5 built-in layout modes. These modes switch the number of 
 - list
 - compact list
 
-The above 7 mode names have built-in CSS: 
+The above 5 mode names have built-in CSS: 
 - for the svg icons when using type=icons (see below).
 - for post listings made with the Listing Builder that have a CSS grid layout with a set number of columns. The built-in CSS _only_ switches the number of columns of the layout. All other desired layout changes, e.g. floating images to the left in "list" mode, or hiding images entirely in "compact list", you can add yourself.
 
