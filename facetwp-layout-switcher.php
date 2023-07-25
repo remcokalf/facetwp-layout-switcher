@@ -2,7 +2,7 @@
 /*
 Plugin Name: FacetWP - Layout Switcher
 Description: Add one or more layout switchers with a shortcode.
-Version: 0.1
+Version: 0.2
 Author: FacetWP, LLC
 Author URI: https://facetwp.com/
 GitHub URI: facetwp/facetwp-layout-switcher
@@ -14,156 +14,195 @@ defined( 'ABSPATH' ) or exit;
 
 class FacetWP_LayoutSwitcher_Addon {
 
-  function __construct() {
+	function __construct() {
 
-    define( 'FACETWP_LAYOUT_SWITCHER_VERSION', '0.1' );
-    define( 'FACETWP_LAYOUT_SWITCHER_URL', plugins_url( '', __FILE__ ) );
+		define( 'FACETWP_LAYOUT_SWITCHER_VERSION', '0.2' );
+		define( 'FACETWP_LAYOUT_SWITCHER_URL', plugins_url( '', __FILE__ ) );
 
-    add_filter( 'facetwp_assets', array( $this, 'assets' ), 11 );
-    add_filter( 'facetwp_shortcode_html', array( $this, 'shortcode' ), 10, 2 );
+		add_filter( 'facetwp_assets', array( $this, 'add_assets' ), 11 );
+		add_filter( 'facetwp_shortcode_html', array( $this, 'process_shortcode' ), 10, 2 );
 
-  }
-
-
-  function assets( $assets ) {
-    $assets['facetwp-layout-switcher.js'] = [
-      FACETWP_LAYOUT_SWITCHER_URL . '/assets/js/front.js',
-      FACETWP_LAYOUT_SWITCHER_VERSION
-    ];
-
-    // Optionally remove layout switcher CSS
-    if ( apply_filters( 'facetwp_layout_switcher_load_css', true ) ) {
-      $assets['facetwp-layout-switcher.css'] = [
-        FACETWP_LAYOUT_SWITCHER_URL . '/assets/css/front.css',
-        FACETWP_LAYOUT_SWITCHER_VERSION
-      ];
-    }
-
-    return $assets;
-  }
+	}
 
 
-  function shortcode( $output, $atts ) {
+	function add_assets( $assets ) {
+		$assets['facetwp-layout-switcher.js'] = [
+			FACETWP_LAYOUT_SWITCHER_URL . '/assets/js/front.js',
+			FACETWP_LAYOUT_SWITCHER_VERSION
+		];
 
-    // Output nothing if no layoutmodes attribute or if it is empty
-    if ( isset( $atts['layoutmodes'] ) ) {
+		// Optionally remove Layout Wwitcher CSS
+		if ( apply_filters( 'facetwp_layout_switcher_load_css', true ) ) {
+			$assets['facetwp-layout-switcher.css'] = [
+				FACETWP_LAYOUT_SWITCHER_URL . '/assets/css/front.css',
+				FACETWP_LAYOUT_SWITCHER_VERSION
+			];
+		}
 
-      if ( empty( $atts['layoutmodes'] ) ) {
-        return $output;
-      }
-
-      // Optionally set target template class
-      $target = ( isset( $atts['target'] ) && ! empty( $atts['target'] ) ) ? " target-" . esc_attr( $atts['target'] ) : ' target-facetwp-template';
+		return $assets;
+	}
 
 
-      // Optional, customizable and translatable main label
-      // Default labeltext is "Show as:" if is set to true
-      // Label attribute can be left out if no label required
+	function process_shortcode( $output, $atts ) {
 
-      $haslabel = isset( $atts['label'] ) && ! empty( $atts['label'] );
+		// Output nothing if no layoutmodes attribute or if it is empty
+		if ( isset( $atts['layoutmodes'] ) ) {
 
-      if ( $haslabel ) {
-        if ( $atts['label'] === "true" ) {
-          $label = facetwp_i18n( __( 'Show as:', 'fwp-layout-switcher' ) );
-        } else {
-          $label = facetwp_i18n( esc_attr( $atts['label'] ) );
-        }
-        $label_output = '<span class="label">' . $label . '</span>';
-      }
+			if ( empty( $atts['layoutmodes'] ) ) {
+				return $output;
+			}
 
-      // Sanitize the layout mode attribute and remove white spaces
-      $no_whitespace = preg_replace( '/\s*,\s*/', ',', esc_attr($atts['layoutmodes']) );
-      $modes_array   = explode( ',', $no_whitespace );
+			// Optionally set target template class
+			if ( isset( $atts['target'] ) && ! empty( $atts['target'] ) ) {
+				$targets = strtolower( preg_replace( '/\s*,\s*/', ',', esc_attr( $atts['target'] ) ) );
+				$target_array = explode( ',', $targets );
+			} else {
+				$target_array = [ 'facetwp-template' ];
+			}
+			$is_multitargetswitcher = count( $target_array ) > 1;
 
-      // Set switcher type: text (default), icons, dropdown or fSelect
-      if ( isset( $atts['type'] ) && $atts['type'] == "dropdown" ) {
+			// Optional, customizable and translatable main label
+			// Default labeltext is "Show as:" (single target) or "Show:" (multi-target) if is set to true
+			// Label attribute can be left out if no label required
+			$haslabel = isset( $atts['label'] ) && ! empty( $atts['label'] );
 
-        $type = "type-dropdown";
+			if ( $haslabel ) {
+				if ( $atts['label'] === "true" ) {
+					if ( $is_multitargetswitcher ) {
+						$label = facetwp_i18n( __( 'Show:', 'fwp-layout-switcher' ) );
+					} else {
+						$label = facetwp_i18n( __( 'Show as:', 'fwp-layout-switcher' ) );
+					}
+				} else {
+					$label = facetwp_i18n( esc_attr( $atts['label'] ) );
+				}
+				$label_output = '<span class="label">' . $label . '</span>';
+			}
 
-      } elseif ( isset( $atts['type'] ) && $atts['type'] == "fselect" ) {
+			// Sanitize the layout mode attribute and remove white spaces
+			$modes = strtolower( preg_replace( '/\s*,\s*/', ',', esc_attr( $atts['layoutmodes'] ) ) );
+			$modes_array = explode( ',', $modes );
 
-        $type = "type-fselect";
+			// Set switcher type: text (default), icons, dropdown or fSelect
+			if ( isset( $atts['type'] ) && $atts['type'] == "dropdown" ) {
 
-        // Load fSelect assets conditionally
-        add_filter( 'facetwp_assets', function( $assets ) {
-          $assets['fSelect.js']  = FACETWP_URL . '/assets/vendor/fSelect/fSelect.js';
-          $assets['fSelect.css'] = FACETWP_URL . '/assets/vendor/fSelect/fSelect.css';
+				$type = "type-dropdown";
 
-          return $assets;
-        } );
+			} elseif ( isset( $atts['type'] ) && $atts['type'] == "fselect" ) {
 
-      } elseif ( isset( $atts['type'] ) && $atts['type'] == "icons" ) {
+				$type = "type-fselect";
 
-        $type = "type-icons";
+				// Load fSelect assets conditionally
+				add_filter( 'facetwp_assets', function ( $assets ) {
+					$assets['fSelect.js']  = FACETWP_URL . '/assets/vendor/fSelect/fSelect.js';
+					$assets['fSelect.css'] = FACETWP_URL . '/assets/vendor/fSelect/fSelect.css';
 
-      } else {
+					return $assets;
+				} );
 
-        $type = "type-text";
+			} elseif ( isset( $atts['type'] ) && $atts['type'] == "icons" ) {
 
-      }
+				$type = "type-icons";
 
-      // Render output
-      $output .= '<div class="facetwp-layout-switcher ' . $type . $target . '">';
+			} else {
 
-      // Output for type dropdown and fselect
-      if ( $type === "type-dropdown" || $type === "type-fselect" ) {
+				$type = "type-text";
 
-        $labelinside = isset( $atts['labelposition'] ) && $atts['labelposition'] === 'inside';
+			}
 
-        if ( $haslabel && ! $labelinside ) {
-          $output .= $label_output;
-        }
+			// Set setinitial - default is true
+			// Set initial mode if setinitial is true
+			if ( isset( $atts['setinitial'] ) && $atts['setinitial'] === "false" ) {
 
-        $output .= '<select>';
+				$initialclass = ' setinitial-false';
 
-        if ( $haslabel && $labelinside ) {
-          $output .= '<option value="">' . $label . '</option>';
-        }
+			} else {
 
-        foreach ( $modes_array as $key => $mode ) {
+				// Get first layout mode class
+				$initialmode  = strtolower( str_replace( ' ', '-', $modes_array[0] ) );
+				$initialclass = " setinitial-true initial-" . $initialmode;
 
-          $mode   = facetwp_i18n( __( $mode, 'fwp-layout-switcher' ) );
-          $class  = 'layoutmode-' . strtolower( str_replace( ' ', '-', $mode ) );
-          $output .= '<option value="' . $class . '">' . $mode . '</option>';
+			}
 
-        }
+			// Set custom class(es)
+			if ( isset( $atts['class'] ) && ! empty( $atts['class'] ) ) {
 
-        $output .= '</select>';
+				$customclass = esc_attr( $atts['class']);
+				$customclass = ' ' . strtolower( preg_replace("/[^a-zA-Z0-9\s\-_]/", "", $customclass) );
 
-        // Default default ul/li
-      } else {
+			} else {
 
-        if ( $haslabel ) {
-          $output .= $label_output;
-        }
-        $output .= '<ul>';
+				$customclass = '';
 
-        foreach ( $modes_array as $key => $mode ) {
+			}
 
-          $mode = facetwp_i18n( __( $mode, 'fwp-layout-switcher' ) );
-          $val   = 'layoutmode-' . strtolower( str_replace( ' ', '-', $mode ) );
+			// Render output
+			$target_classes = ' target-' . implode(' target-', $target_array);
+			$switchertype_class = $is_multitargetswitcher  ? ' multitarget' : ' singletarget';
 
-          $class = ( $key === 0 ) ? "active" : "";
-          $title = isset( $label ) ? $label . ' ' . $mode : $mode;
+			// Two types: single target switchers, and multi-target switchers.
+			// Both types need to function independently
+			$prefix = count($target_array) > 1 ? 'multitarget-mode-' : 'singletarget-mode-';
 
-          $output .= '<li class="' . $class . '" data-value="' . $val . '"><a href="#" title="' . $title . '"><span>' . $mode . '</span></a></li>';
+			$output .= '<div class="facetwp-layout-switcher ' . $type . $target_classes . $initialclass . $switchertype_class . $customclass . '">';
 
-        }
+			// Output for type dropdown and fselect
+			if ( $type === "type-dropdown" || $type === "type-fselect" ) {
 
-        $output .= '</ul>';
+				$labelinside = isset( $atts['labelposition'] ) && $atts['labelposition'] === 'inside';
 
-      }
+				if ( $haslabel && ! $labelinside ) {
+					$output .= $label_output;
+				}
 
-      $output .= '</div>';
+				$output .= '<select>';
 
-    }
+				if ( $haslabel && $labelinside ) {
+					$output .= '<option value="">' . $label . '</option>';
+				}
 
-    return $output;
+				foreach ( $modes_array as $key => $mode ) {
 
-  }
+					$mode = facetwp_i18n( __( $mode, 'fwp-layout-switcher' ) );
+					$class  = $prefix . strtolower( str_replace( ' ', '-', $mode ) );
+					$output .= '<option value="' . $class . '">' . $mode . '</option>';
 
+				}
+
+				$output .= '</select>';
+
+			// Outpt default ul/li
+			} else {
+
+				if ( $haslabel ) {
+					$output .= $label_output;
+				}
+				$output .= '<ul>';
+
+				foreach ( $modes_array as $key => $mode ) {
+
+					$mode = facetwp_i18n( __( $mode, 'fwp-layout-switcher' ) );
+					$val  = $prefix . strtolower( str_replace( ' ', '-', $mode ) );
+
+					$class = ( $key === 0 ) ? "active" : "";
+					$title = isset( $label ) ? $label . ' ' . $mode : $mode;
+
+					$output .= '<li class="' . $class . '" data-value="' . $val . '"><a href="#" title="' . $title . '"><span>' . $mode . '</span></a></li>';
+
+				}
+
+				$output .= '</ul>';
+
+			}
+
+			$output .= '</div>';
+
+		}
+
+		return $output;
+
+	}
 
 }
-
 
 new FacetWP_LayoutSwitcher_Addon();
