@@ -109,12 +109,12 @@
 }
 
 .facetwp-layout-switcher.type-icons li[data-value="multitarget-mode-map"] a {
-    -webkit-mask: url('../images/compact-list.svg') no-repeat 0 0;
+    -webkit-mask: url('../images/map.svg') no-repeat 0 0;
     mask: url('../images/map.svg') no-repeat 0 0;
 }
 
 .facetwp-layout-switcher.type-icons li[data-value="multitarget-mode-both"] a {
-    -webkit-mask: url('../images/compact-list.svg') no-repeat 0 0;
+    -webkit-mask: url('../images/both.svg') no-repeat 0 0;
     mask: url('../images/both.svg') no-repeat 0 0;
 }
 

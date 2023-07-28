@@ -2,7 +2,7 @@
 /*
 Plugin Name: FacetWP - Layout Switcher
 Description: Add one or more layout switchers with a shortcode.
-Version: 0.2
+Version: 0.2.1
 Author: FacetWP, LLC
 Author URI: https://facetwp.com/
 GitHub URI: facetwp/facetwp-layout-switcher
@@ -16,7 +16,7 @@ class FacetWP_LayoutSwitcher_Addon {
 
 	function __construct() {
 
-		define( 'FACETWP_LAYOUT_SWITCHER_VERSION', '0.2' );
+		define( 'FACETWP_LAYOUT_SWITCHER_VERSION', '0.2.1' );
 		define( 'FACETWP_LAYOUT_SWITCHER_URL', plugins_url( '', __FILE__ ) );
 
 		add_filter( 'facetwp_assets', array( $this, 'add_assets' ), 11 );
